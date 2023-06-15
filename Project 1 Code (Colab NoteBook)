@@ -1,0 +1,126 @@
+##LINK
+
+https://colab.research.google.com/drive/1zOL9u2oV7g1aIht343vtS9FRfCNS3cri?usp=sharing
+
+
+
+from google.colab import drive
+import datetime
+import numpy as np
+import pandas as pd
+
+
+data = pd.read_csv(r"/content/drive/MyDrive/COMP231@G/Seale2014.csv")
+
+
+import pandas as pd
+import math
+
+def milimetersToInches(mm):     #converts milimeters to inches
+    return mm * 0.0393701
+
+def getMonthFromDate(dateNum):      #gets a numerical month from the entire date value
+    return int(dateNum / 100) % 100
+
+if __name__ == '__main__':
+    WeatherDF = pd.read_csv(r"/content/drive/MyDrive/Seale2014.csv")
+
+    print("Annual Statistics:")
+
+    #How many days out of the year does it actually rain?
+
+    daysWithRainDF = WeatherDF[WeatherDF['PRCP']>0]
+
+    daysWithRainCount = daysWithRainDF['PRCP'].count()
+
+    print("# of days it rains: ", daysWithRainCount)
+
+    #What is the average and standard deviation of precipitaon (in inches) when it does rain?
+
+    meanPrcp = daysWithRainDF['PRCP'].sum()/daysWithRainCount       #calculates mean preceptation
+
+    totalVariation = 0
+    for index, value in daysWithRainDF['PRCP'].items():         #computes total variation for later use for standard deviation
+        totalVariation += pow((value - meanPrcp), 2)
+
+    standardDeviation = math.sqrt(totalVariation / daysWithRainCount)
+
+    print(f"Avg (stdev) rainfall:  {milimetersToInches(meanPrcp):.1f} +/- {milimetersToInches(meanPrcp):.1f}")
+
+    # What is the average minimum and maximum recorded temperatures on days that it rains?
+
+    print(f"Avg min & max temperature on rainy days: {daysWithRainDF['TMIN'].mean():.1f} F - {daysWithRainDF['TMAX'].mean():.1f} F") #gets average min and max values using pandas series functions
+
+    # What is the average minimum and maximum recorded temperatures on days that it does not rains?
+
+    daysWithoutRainDF = WeatherDF[WeatherDF['PRCP']==0]
+
+    print(f"Avg min & max temperature on non-rainy days: {daysWithoutRainDF['TMIN'].mean():.1f} F - {daysWithoutRainDF['TMAX'].mean():.1f} F")
+
+    # Monthly Stats
+
+    #How many days does it rain per month
+
+    monthlyDaysRainedList = []
+    monthlyRainInches = []              #creates lists for values for each month
+    monthlyMaxTemp = []
+    monthlyMinTemp = []
+
+    for i in range(12):
+        monthlyDaysRainedList.append(0)
+        monthlyRainInches.append(0)                 #fills above lists with starting values
+        monthlyMaxTemp.append(0)
+        monthlyMinTemp.append(0)
+
+    for index, row in WeatherDF.iterrows():
+        if row['PRCP'] > 0:                                         #checks if rain fell that day
+            monthlyDaysRainedList[getMonthFromDate(row['DATE'])-1] += 1     #checks which numerical month that date is and adds to that value in the table
+            monthlyRainInches[getMonthFromDate(row['DATE'])-1] += milimetersToInches(row['PRCP'])
+
+    for monthNum in range(12):
+        maxTempsByMonth = []
+        minTempsByMonth = []
+
+        for index, row in WeatherDF.iterrows():
+            if getMonthFromDate(row['DATE']) - 1 == monthNum:
+                maxTempsByMonth.append(row['TMAX'])
+                minTempsByMonth.append(row['TMIN'])
+
+        monthlyMaxTemp[monthNum] = max(maxTempsByMonth)
+        monthlyMinTemp[monthNum] = min(minTempsByMonth)
+
+
+    #outputting monthly stats
+
+    print("\nMonthly Statistics:")
+    print(f"{'Month':<20}{'# days it rains': <20}{'inches of rain': <20}{'Min Temp (F)': <20}{'Max Temp (F)': <20}")
+
+    months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+    for monthNum in range(12):
+        print(f"{months[monthNum]:<20}{monthlyDaysRainedList[monthNum]: <20}{monthlyRainInches[monthNum]: .1f}{monthlyMinTemp[monthNum]: >20}{monthlyMaxTemp[monthNum]: >20}")
+
+
+
+
+import pandas as pd
+
+data = {'Month': ['January','February','March','April','May','June','July','August','September','October','November','December'], 
+        '# days it rains': [13,19,20,13,8,9,2,7,9,19,16,15], 
+        'Inches of rain': [(37.0),(61.1),(94.5),(41.8),(31.5),(7.4),(7.7),(18.1),(22.3),(67.5),(48.5),(48.0)],
+        'Min Temp (F)': [-5,-60,11,44,72,89,117,111,100,67,-49,-32],
+        'Max Temp (F)': [144,144,189,278,294,261,344,356,322,256,167,189]
+        }
+
+df = pd.DataFrame(data, columns= ['Month','# days it rains','Inches of rain', 'Min Temp (F)', 'Max Temp (F)'])
+
+#if __name__ == '__main__':
+ #   WeatherDF = pd.read_csv('Seale2014.csv')
+    
+  #  import os
+#f = open(os.path.expanduser("~/Desktop/somefile.txt"))
+
+df.to_csv('/content/drive/MyDrive/MASTERMOETITLED69.csv', index=False, header=True)
+
+print(df)
+
+
